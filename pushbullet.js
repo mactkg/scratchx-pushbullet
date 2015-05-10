@@ -14,17 +14,21 @@
         return {status: 2, msg: 'Ready'};
     };
 
-    ext.setAccessToken = function(token) {
+    ext.setAccessToken = function(token, callback) {
       ext._token = token;
       $.ajax({
         type: "GET",
         url: ext._API+"/devices",
         headers: {
           "Authorization": "Bearer " + token
+        },
+        context: {
+          callback: callback
         }
       }).done(function(msg) {
         ext._devices = msg.devices;
         ext.ready = true;
+        this.callback();
       });
     };
 
@@ -86,11 +90,11 @@
     // Block and block menu descriptions
     var descriptor = {
         blocks: [
-            [' ', 'set access token as %s', 'setAccessToken'],
+            ['w', 'set access token as %s', 'setAccessToken'],
             [' ', 'send push message:%s title:%s to %s', 'push', 'Hello!', 'Message from Scratch', 'device_id'],
             ['w', 'send push message:%s title:%s to %s and wait', 'push', 'Hello!', 'Message from Scratch', 'device_id'],
-            ['r', 'name of device %n', 'getDeviceName'],
-            ['r', 'id of device %n', 'getDeviceId'],
+            ['r', 'name of device %n', 'getDeviceName', '0'],
+            ['r', 'id of device %n', 'getDeviceId', '0'],
             ['r', 'number of device', 'getDevice'],
             ['r', 'ready', 'isReady']
         ],
