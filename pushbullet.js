@@ -1,7 +1,7 @@
 (function(ext) {
     ext._API = "https://api.pushbullet.com/v2";
     ext._devices = [];
-    ext._is_ready = false;
+    ext._ready = false;
 
     window['temp'] = 0; // init
 
@@ -24,6 +24,7 @@
         }
       }).done(function(msg) {
         ext._devices = msg.devices;
+        ext.ready = true;
       });
     };
 
@@ -41,13 +42,25 @@
         return null;
     };
 
-    ext.push = function(title, msg, device) {
+    ext.getDeviceLength = function() {
+      if(ext._devices)
+        return ext._devices.length;
+      else
+        return 0;
+    };
+
+    ext.isReady = function() {
+      return ext._ready
+    };
+
+    ext.push = function(title, msg, device, var_args) {
       var data = {
         type: "note",
         title: title,
         body: msg,
         device_iden: device
       };
+      var callback = arguments[3];
 
       $.ajax({
         type: "POST",
@@ -57,9 +70,16 @@
           "Authorization": "Bearer " + ext._token,
           "Content-Type": "application/json"
         },
-        data: JSON.stringify(data)
+        data: JSON.stringify(data),
+        context: {
+          callback: callback
+        }
       }).done(function(msg) {
         console.log(msg);
+      }).always(function(msg) {
+        if(this.callback) {
+          this.callback();
+        }
       });
     };
 
@@ -67,15 +87,15 @@
     var descriptor = {
         blocks: [
             [' ', 'set access token as %s', 'setAccessToken'],
-            ['w', 'send push message:%s title:%s to %s', 'push', 'Hello!', 'Message from Scratch', 'device_id'],
-            [' ', 'send push message %s to %s and wait', 'pushAndWait', 'Hello!', 'device_id'],
+            [' ', 'send push message:%s title:%s to %s', 'push', 'Hello!', 'Message from Scratch', 'device_id'],
+            ['w', 'send push message:%s title:%s to %s and wait', 'push', 'Hello!', 'Message from Scratch', 'device_id'],
             ['r', 'name of device %n', 'getDeviceName'],
             ['r', 'id of device %n', 'getDeviceId'],
+            ['r', 'number of device', 'getDevice'],
             ['r', 'ready', 'isReady']
         ],
         url: 'http://makerbox.net/scratchx-pushbullet'
     };
-
 
     // Register the extension
     ScratchExtensions.register('PushBullet', descriptor, ext);
