@@ -15,15 +15,15 @@
     };
 
     ext.setAccessToken = function(token) {
-      ext.token = token;
+      ext._token = token;
       $.ajax({
         type: "GET",
         url: ext._API+"/devices",
         headers: {
-          "Authorization: Bearer": token
+          "Authorization": "Bearer " + token
         }
       }).done(function(msg) {
-        ext._devices = JSON.parse(msg);
+        ext._devices = msg.devices;
       });
     };
 
@@ -50,15 +50,16 @@
       };
 
       $.ajax({
-        type: "GET",
-        url: ext._API+"/push",
+        type: "POST",
+        url: ext._API+"/pushes",
+        dataType: "json",
         headers: {
-          "Authorization": "Bearer: " + token,
+          "Authorization": "Bearer " + ext._token,
           "Content-Type": "application/json"
         },
         data: JSON.stringify(data)
       }).done(function(msg) {
-        console.log(JSON.parse(msg));
+        console.log(msg);
       });
     };
 
