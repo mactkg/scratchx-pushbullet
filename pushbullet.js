@@ -56,7 +56,7 @@
           "Authorization": "Bearer: " + token,
           "Content-Type": "application/json"
         },
-        data: JSON.stringify(data);
+        data: JSON.stringify(data)
       }).done(function(msg) {
         console.log(JSON.parse(msg));
       });
